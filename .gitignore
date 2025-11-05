@@ -39,3 +39,10 @@ inc/
 /.carmel/
 # cpanfile.snapshot should generally be ignored for library code, otherwise included
 # cpanfile.snapshot 
+
+.idea/*
+
+**/*.egg-info
+**/yolov8n.pt
+
+**/repomix*
