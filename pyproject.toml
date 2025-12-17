@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "couch-nagger"
+version = "0.1.0"
+description = "Automated couch watcher to keep Fonzy off the couch"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Ted Slusser", email = "ted.slusser@gmail.com"}
+]
+
+dependencies = [
+    "ultralytics>=8.3.0",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+raspberrypi = [
+    "picamera2>=0.3.0",
+]
+
+notifications = [
+    "requests>=2.31.0",
+    "python-pushover>=0.4",
+]
+
+[project.scripts]
+couch-monitor = "monitor:main"
+
+[tool.setuptools]
+packages = ["dog_detector"]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
