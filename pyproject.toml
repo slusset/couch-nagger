@@ -7,7 +7,7 @@ name = "couch-nagger"
 version = "0.1.0"
 description = "Automated couch watcher to keep Fonzy off the couch"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Ted Slusser", email = "ted.slusser@gmail.com"}
@@ -36,7 +36,6 @@ raspberrypi = [
 
 notifications = [
     "requests>=2.31.0",
-    "python-pushover>=0.4",
 ]
 
 [project.scripts]
