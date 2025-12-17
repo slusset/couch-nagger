@@ -32,7 +32,7 @@ class TestBoxOverlap:
 
 class TestDogDetector:
     def setup_method(self):
-        self.detector = DogDetector(model_path='yolov8n.pt')
+        self.detector = DogDetector(model_path='yolov8m.pt')
 
     def test_dog_on_couch_detected(self):
         image_path = IMAGE_DIR / "test_dog_on_couch.jpg"
@@ -60,3 +60,8 @@ class TestDogDetector:
         image_path = IMAGE_DIR / "test_dog_on_couch_grayscale_3ch.jpg"
         result = self.detector.check_image(str(image_path))
         assert result['dog_on_couch'] == True
+
+    def test_rpicam_couch_detected(self):
+        image_path = IMAGE_DIR / "test_rpicam_couch.jpg"
+        result = self.detector.check_image(str(image_path), conf_threshold=0.3)
+        assert result['confidence']['couch'] > 0.2

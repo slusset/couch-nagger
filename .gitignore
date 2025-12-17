@@ -42,7 +42,9 @@ inc/
 
 .idea/*
 
+venv/
+
 **/*.egg-info
-**/yolov8n.pt
+**/yolov8*.pt
 
 **/repomix*

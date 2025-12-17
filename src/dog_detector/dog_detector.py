@@ -19,14 +19,14 @@ def boxes_overlap(box1, box2):
 
 
 class DogDetector:
-    def __init__(self, model_path='yolov8n.pt'):
+    def __init__(self, model_path='yolov8m.pt'):
         self.model = YOLO(model_path)
         self.DOG_CLASS = 16
         self.COUCH_CLASS = 57
 
-    def check_image(self, image_path):
+    def check_image(self, image_path, conf_threshold=0.25):
         """Returns dict with detection results."""
-        results = self.model(image_path)
+        results = self.model(image_path, conf=conf_threshold)
 
         dog_boxes = []
         couch_boxes = []
