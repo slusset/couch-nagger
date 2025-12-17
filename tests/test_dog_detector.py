@@ -63,5 +63,33 @@ class TestDogDetector:
 
     def test_rpicam_couch_detected(self):
         image_path = IMAGE_DIR / "test_rpicam_couch.jpg"
-        result = self.detector.check_image(str(image_path), conf_threshold=0.3)
-        assert result['confidence']['couch'] > 0.2
+        result = self.detector.check_image(str(image_path))
+        assert result['confidence']['couch'] > 0.5
+
+    def test_fonzy_on_couch(self):
+        image_path = IMAGE_DIR / "fonzy_on_couch.png"
+        result = self.detector.check_image(str(image_path))
+        assert result['dog_on_couch'] == True
+        assert result['confidence']['dog'] > 0.5
+        assert result['confidence']['couch'] > 0.5
+
+    def test_fonzy_sitting_on_couch(self):
+        image_path = IMAGE_DIR / "fonzy_sitting_on_couch.png"
+        result = self.detector.check_image(str(image_path))
+        assert result['dog_on_couch'] == True
+        assert result['confidence']['dog'] > 0.5
+        assert result['confidence']['couch'] > 0.5
+
+    def test_fonzy_sleeping_on_couch(self):
+        image_path = IMAGE_DIR / "fonzy_sleeping_on_couch.png"
+        result = self.detector.check_image(str(image_path))
+        assert result['dog_on_couch'] == True
+        assert result['confidence']['dog'] > 0.5
+        assert result['confidence']['couch'] > 0.5
+
+    def test_fonzy_getting_off_couch(self):
+        image_path = IMAGE_DIR / "fonzy_getting_off_couch.png"
+        result = self.detector.check_image(str(image_path))
+        assert result['dog_on_couch'] == True
+        assert result['confidence']['dog'] > 0.5
+        assert result['confidence']['couch'] > 0.5

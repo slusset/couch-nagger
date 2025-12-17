@@ -46,8 +46,8 @@ htmlcov/
 .hypothesis/
 
 # YOLO models (download on setup)
-yolov8*.pt
-!yolov8n.pt
+**/yolov8*.pt
+
 
 # Captured images and results
 result.jpg
