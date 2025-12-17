@@ -33,6 +33,44 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+### Raspberry Pi Setup
+
+For Raspberry Pi (Bookworm or newer), we use a specific workflow to integrate with system camera libraries.
+
+1.  **Install `uv`** (if not already installed):
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    source $HOME/.local/bin/env
+    ```
+
+2.  **Bootstrap System Dependencies**:
+    Run the provided script to install `python3-picamera2`, `rpicam-apps`, and other required system packages.
+    ```bash
+    ./scripts/pi_bootstrap.sh
+    ```
+
+3.  **Create Environment & Install**:
+    We use the system python and system site packages to access the pre-installed camera libraries.
+    ```bash
+    # Create venv using system python and site packages
+    uv venv .venv --python /usr/bin/python3 --system-site-packages
+    source .venv/bin/activate
+
+    # Install couch-nagger with Pi support
+    uv pip install -e ".[raspberrypi]"
+    ```
+
+4.  **Verify Setup**:
+    Run the health check script to ensure everything is working:
+    ```bash
+    ./scripts/pi_health_check.sh
+    ```
+    
+    Or manually check camera access:
+    ```bash
+    python scripts/cam_test.py
+    ```
+
 ### Basic Usage
 
 ```python

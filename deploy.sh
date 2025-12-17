@@ -95,6 +95,13 @@ fi
 
 cd /home/pi/couch-nagger
 
+# Make scripts executable
+chmod +x scripts/*.sh
+
+# Run bootstrap for system dependencies
+log_info "Running system bootstrap..."
+./scripts/pi_bootstrap.sh
+
 # Install uv if not present
 if ! command -v uv &> /dev/null; then
     log_info "Installing uv..."
@@ -102,28 +109,17 @@ if ! command -v uv &> /dev/null; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Create virtual environment with uv
+# Create virtual environment with uv (using system python + site packages)
 log_info "Setting up Python environment with uv..."
-if [ ! -d ".venv" ]; then
-    uv venv --python 3.11 .venv
-fi
+# We force recreation to ensure flags are correct
+rm -rf .venv
+uv venv .venv --python /usr/bin/python3 --system-site-packages
 
 source .venv/bin/activate
 
-# Install dependencies
-log_info "Installing dependencies..."
-uv pip install -r requirements.txt
-
-# Install package in editable mode
+# Install package in editable mode with Pi extras
 log_info "Installing couch-nagger package..."
-uv pip install -e .
-
-# Install picamera2 if not already installed
-log_info "Installing picamera2..."
-sudo apt-get update
-sudo apt-get install -y python3-picamera2
-# Link system package to venv
-ln -sf /usr/lib/python3/dist-packages/picamera2 .venv/lib/python*/site-packages/ 2>/dev/null || true
+uv pip install -e ".[raspberrypi]"
 
 # Download lightweight model
 log_info "Downloading YOLOv8 nano model..."
@@ -133,6 +129,9 @@ if [ ! -f "yolov8n.pt" ]; then
 else
     log_info "Model already exists"
 fi
+
+log_info "Running health check..."
+./scripts/pi_health_check.sh
 
 log_info "Pi setup complete!"
 ENDSSH
@@ -232,8 +231,8 @@ main() {
     elif [ "${DEPLOY_MODE}" = "update" ]; then
         log_info "Performing update..."
         sync_code
-        # Update dependencies if requirements.txt changed
-        ssh "${PI_USER}@${PI_HOST}" "cd ${PI_DIR} && source .venv/bin/activate && uv pip install -r requirements.txt"
+        # Update dependencies
+        ssh "${PI_USER}@${PI_HOST}" "cd ${PI_DIR} && source .venv/bin/activate && uv pip install -e \".[raspberrypi]\""
         restart_service
         show_status
         echo ""
