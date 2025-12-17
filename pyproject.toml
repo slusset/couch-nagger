@@ -39,7 +39,7 @@ notifications = [
 ]
 
 [project.scripts]
-couch-monitor = "monitor:main"
+couch-monitor = "dog_detector.monitor:main"
 
 [tool.setuptools]
 packages = ["dog_detector"]
