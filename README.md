@@ -19,7 +19,7 @@ Couch Nagger uses YOLOv8 computer vision to detect when your dog is on the couch
 
 ## Quick Start
 
-### Installation
+### Installation (On Development Machine)
 
 ```bash
 # Clone the repository
