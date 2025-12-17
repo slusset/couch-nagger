@@ -1,50 +1,90 @@
-!Build/
-.last_cover_stats
-/META.yml
-/META.json
-/MYMETA.*
-*.o
-*.pm.tdy
-*.bs
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
 
-# Devel::Cover
-cover_db/
-
-# Devel::NYTProf
-nytprof.out
-
-# Dist::Zilla
-/.build/
-
-# Module::Build
-_build/
-Build
-Build.bat
-
-# Module::Install
-inc/
-
-# ExtUtils::MakeMaker
-/blib/
-/_eumm/
-/*.gz
-/Makefile
-/Makefile.old
-/MANIFEST.bak
-/pm_to_blib
-/*.zip
-
-# Carton/Carmel
-/local/
-/.carmel/
-# cpanfile.snapshot should generally be ignored for library code, otherwise included
-# cpanfile.snapshot 
-
-.idea/*
-
+# Virtual environments
 venv/
+env/
+ENV/
+.venv
 
-**/*.egg-info
-**/yolov8*.pt
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
 
-**/repomix*
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# YOLO models (download on setup)
+yolov8*.pt
+!yolov8n.pt
+
+# Captured images and results
+result.jpg
+captures/
+*.jpg
+!images/test*.jpg
+!docs/**/*.jpg
+
+# Logs
+logs/
+*.log
+
+# Configuration (may contain secrets)
+config/production.env
+config/*.env
+!config/*.env.example
+
+# Temporary files
+temp*.jpg
+current*.jpg
+alert*.jpg
+enhanced*.jpg
+resized*.jpg
+
+# Package files
+*.tar.gz
+*.zip
+
+# Repomix output
+repomix-output.md
+repomix-output.txt
+
+# Backup files
+*.bak
+*.backup
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
