@@ -32,7 +32,7 @@ class CouchMonitorApp:
             # 2. Detect
             result = self.detector.detect(frame)
             
-            logger.debug(f"Detection Result: {result}")
+            logger.info(f"Detection Result: {result}")
 
             if result.dog_on_couch:
                 current_time = time.time()

@@ -8,13 +8,14 @@ from dog_detector.domain.model import DetectionResult
 logger = logging.getLogger(__name__)
 
 class AudioAlert(AlertSinkPort):
-    def __init__(
-        self,
-        sound_file: str = "/usr/share/sounds/alsa/Front_Center.wav",
-        sound_dir: str | None = None,
-    ):
+    def __init__(self,
+                 sound_file: str = "/usr/share/sounds/alsa/Front_Center.wav",
+                 sound_dir: str | None = None,
+                 alsa_device='default',
+                 quiet=True):
         self.sound_file = sound_file
         self.sound_dir = Path(sound_dir) if sound_dir else None
+        self.alsa_device = alsa_device
 
     def _pick_sound_file(self) -> str | None:
         if not self.sound_dir:
@@ -36,14 +37,13 @@ class AudioAlert(AlertSinkPort):
         return str(random.choice(candidates))
 
     def alert(self, result: DetectionResult) -> None:
-        if result.dog_on_couch:
-            try:
-                sound_file = self._pick_sound_file()
-                if not sound_file:
-                    return
-                logger.info(f"Playing alert sound: {sound_file}")
-                subprocess.run(["aplay", "-q", sound_file], check=False)
-            except FileNotFoundError:
-                logger.error("aplay command not found. Is alsa-utils installed?")
-            except Exception as e:
-                logger.error(f"Failed to play alert sound: {e}")
+        try:
+            sound_file = self._pick_sound_file()
+            if not sound_file:
+                return
+            logger.info(f"Playing alert sound: {sound_file}")
+            subprocess.run(["aplay", "-D", self.alsa_device, "-q", sound_file], check=False)
+        except FileNotFoundError:
+            logger.error("aplay command not found. Is alsa-utils installed?")
+        except Exception as e:
+            logger.error(f"Failed to play alert sound: {e}")

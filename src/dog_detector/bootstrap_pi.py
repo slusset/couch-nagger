@@ -17,6 +17,7 @@ from dog_detector.adapters.file_source import FileFrameSource
 from dog_detector.adapters.ultralytics_detector import UltralyticsDetector
 # Ports & Domain
 from dog_detector.app.couch_monitor import CouchMonitorApp
+from dog_detector.settings import AppSettings
 
 # Attempt to import Picamera adapter
 try:
@@ -55,27 +56,10 @@ def setup_logging(log_level_str, log_file_path):
     )
     logging.info("Logging initialized")
 
-
-def load_config():
-    """Load configuration from environment variables."""
-    return {
-        'model_path': os.getenv('MODEL_PATH', 'yolov8m.pt'),
-        'confidence_threshold': float(os.getenv('CONFIDENCE_THRESHOLD', '0.25')),
-        'check_interval': float(os.getenv('CHECK_INTERVAL', '10.0')),
-        'alert_cooldown': float(os.getenv('ALERT_COOLDOWN', '300.0')),
-        'camera_width': int(os.getenv('CAMERA_RESOLUTION_WIDTH', '640')),
-        'camera_height': int(os.getenv('CAMERA_RESOLUTION_HEIGHT', '480')),
-        'log_level': os.getenv('LOG_LEVEL', 'INFO'),
-        'log_file': os.getenv('LOG_FILE', 'logs/couch-nagger.log'),
-        'test_image': os.getenv('TEST_IMAGE', 'images/test_dog_on_couch.jpg'),
-        'alert_sound': os.getenv('ALERT_SOUND', '/usr/share/sounds/alsa/Front_Center.wav'),
-        'alert_sound_dir': os.getenv('ALERT_SOUND_DIR'),
-    }
-
-
 def main():
-    config = load_config()
-    setup_logging(config['log_level'], config['log_file'])
+    env_file = os.getenv("COUCH_NAGGER_ENV_FILE")
+    settings = AppSettings.load(env_file=env_file)
+    setup_logging(settings.logging.level, settings.logging.file)
     logger = logging.getLogger("Main")
 
     logger.info("Initializing Couch Nagger (Hexagonal)...")
@@ -85,8 +69,8 @@ def main():
     if PICAMERA_AVAILABLE:
         try:
             frame_source = Picamera2FrameSource(
-                width=config['camera_width'],
-                height=config['camera_height']
+                width=settings.camera.width,
+                height=settings.camera.height
             )
             logger.info("Using Picamera2FrameSource")
         except Exception as e:
@@ -94,7 +78,7 @@ def main():
     
     if frame_source is None:
         logger.warning("Picamera2 not available or failed. Falling back to FileFrameSource.")
-        test_img = config['test_image']
+        test_img = settings.camera.image_dir + 'test.jpg'
         if os.path.exists(test_img):
             frame_source = FileFrameSource(test_img)
             logger.info(f"Using FileFrameSource with {test_img}")
@@ -103,11 +87,11 @@ def main():
             sys.exit(1)
 
     # 2. Adapter: Detector
-    logger.info(f"Loading detector model: {config['model_path']}")
+    logger.info(f"Loading detector model: {settings.model.model_path}")
     try:
         detector = UltralyticsDetector(
-            model_path=config['model_path'],
-            conf_threshold=config['confidence_threshold']
+            model_path=settings.model.model_path,
+            conf_threshold=settings.model.confidence_threshold
         )
     except Exception as e:
         logger.error(f"Failed to initialize detector: {e}")
@@ -115,8 +99,10 @@ def main():
 
     # 3. Adapter: Alert Sink
     alert_sink = AudioAlert(
-        sound_file=config['alert_sound'],
-        sound_dir=config['alert_sound_dir'],
+        sound_file=settings.audio.alert_sound,
+        sound_dir=settings.audio.alert_sound_dir,
+        alsa_device=settings.audio.alsa_device,
+        quiet=settings.audio.aplay_quiet
     )
 
     # 4. App: Monitor
@@ -124,8 +110,8 @@ def main():
         frame_source=frame_source,
         detector=detector,
         alert_sink=alert_sink,
-        check_interval=config['check_interval'],
-        alert_cooldown=config['alert_cooldown']
+        check_interval=settings.detection.check_interval,
+        alert_cooldown=settings.detection.alert_cooldown
     )
 
     # Run
