@@ -5,19 +5,19 @@ Couch Nagger - Raspberry Pi Monitor (Hexagonal Architecture)
 Continuously monitors the couch using Pi Camera and alerts when dog detected.
 """
 
+import logging
 import os
 import sys
-import logging
 from pathlib import Path
+from ultralytics import YOLO
 
-# Ports & Domain
-from dog_detector.domain.model import DetectionResult
-from dog_detector.app.monitor import CouchMonitorApp
-
-# Adapters
-from dog_detector.adapters.ultralytics_detector import UltralyticsDetector
 from dog_detector.adapters.audio_alert import AudioAlert
 from dog_detector.adapters.file_source import FileFrameSource
+# Adapters
+from dog_detector.adapters.ultralytics_detector import UltralyticsDetector
+# Ports & Domain
+from dog_detector.app.couch_monitor import CouchMonitorApp
+
 # Attempt to import Picamera adapter
 try:
     from dog_detector.adapters.picamera2_source import Picamera2FrameSource
@@ -25,6 +25,17 @@ try:
 except ImportError:
     PICAMERA_AVAILABLE = False
 
+
+def load_yolo_model(model_dir: str, model_name: str):
+    d = Path(model_dir)
+    d.mkdir(parents=True, exist_ok=True)
+
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(d)  # ensures ultralytics downloads here
+        return YOLO(model_name)  # downloads if missing
+    finally:
+        os.chdir(old_cwd)
 
 def setup_logging(log_level_str, log_file_path):
     log_level = getattr(logging, log_level_str.upper())
@@ -48,7 +59,7 @@ def setup_logging(log_level_str, log_file_path):
 def load_config():
     """Load configuration from environment variables."""
     return {
-        'model_path': os.getenv('MODEL_PATH', 'yolov8n.pt'),
+        'model_path': os.getenv('MODEL_PATH', 'yolov8m.pt'),
         'confidence_threshold': float(os.getenv('CONFIDENCE_THRESHOLD', '0.25')),
         'check_interval': float(os.getenv('CHECK_INTERVAL', '10.0')),
         'alert_cooldown': float(os.getenv('ALERT_COOLDOWN', '300.0')),

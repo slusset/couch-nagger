@@ -85,6 +85,9 @@ else
     log_info "Model already exists: ${MODEL_PATH}"
 fi
 
+# Create config directory for environment file
+mkdir -p config
+
 # Test imports
 log_info "Testing Python imports..."
 .venv/bin/python -c "import libcamera; print('✓ libcamera')"

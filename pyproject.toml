@@ -39,7 +39,7 @@ notifications = [
 ]
 
 [project.scripts]
-couch-monitor = "dog_detector.monitor:main"
+couch-monitor = "dog_detector.bootstrap_pi:main"
 
 [tool.uv]
 environments = [

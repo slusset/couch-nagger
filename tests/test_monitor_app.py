@@ -1,6 +1,6 @@
 import time
 
-from dog_detector.app.monitor import CouchMonitorApp
+from dog_detector.app.couch_monitor import CouchMonitorApp
 from dog_detector.domain.model import DetectionResult
 
 
