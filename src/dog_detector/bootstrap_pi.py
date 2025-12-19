@@ -110,8 +110,7 @@ def main():
         frame_source=frame_source,
         detector=detector,
         alert_sink=alert_sink,
-        check_interval=settings.detection.check_interval,
-        alert_cooldown=settings.detection.alert_cooldown
+        settings=settings
     )
 
     # Run

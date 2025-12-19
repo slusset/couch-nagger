@@ -54,6 +54,8 @@ class ModelSettings:
 class DetectionSettings:
     check_interval: float = 10.0
     alert_cooldown: float = 300.0
+    test_mode: bool = False
+    test_alert_every_n: int = 0
 
 
 @dataclass(frozen=True)
@@ -109,6 +111,8 @@ class AppSettings:
         detection = DetectionSettings(
             check_interval=_getenv_float("CHECK_INTERVAL", 10.0),
             alert_cooldown=_getenv_float("ALERT_COOLDOWN", 300.0),
+            test_mode=(_getenv("TEST_MODE", "0") == "1"),
+            test_alert_every_n=_getenv_int("TEST_ALERT_EVERY_N", 0),
         )
 
         camera = CameraSettings(

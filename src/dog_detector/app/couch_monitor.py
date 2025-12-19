@@ -1,8 +1,11 @@
 import time
 import logging
+
+from dog_detector.domain.model import DetectionResult
 from dog_detector.ports.frame_source import FrameSourcePort
 from dog_detector.ports.detector import DetectorPort
 from dog_detector.ports.alert_sink import AlertSinkPort
+from dog_detector.settings import AppSettings
 
 logger = logging.getLogger(__name__)
 
@@ -12,14 +15,14 @@ class CouchMonitorApp:
         frame_source: FrameSourcePort,
         detector: DetectorPort,
         alert_sink: AlertSinkPort,
-        check_interval: float = 10.0,
-        alert_cooldown: float = 300.0
+        settings: AppSettings,
     ):
         self.frame_source = frame_source
         self.detector = detector
         self.alert_sink = alert_sink
-        self.check_interval = check_interval
-        self.alert_cooldown = alert_cooldown
+        self.check_interval = settings.detection.check_interval
+        self.alert_cooldown = settings.detection.alert_cooldown
+        self.test_mode = settings.detection.test_mode
         
         self.last_alert_time = 0.0
         self.running = False
@@ -54,7 +57,11 @@ class CouchMonitorApp:
         self.running = True
         logger.info("Starting CouchMonitorApp...")
         try:
+            tick = 0
             while self.running:
+                tick += 1
+                if self.test_mode:
+                    self.alert_sink.alert(DetectionResult(dog_on_couch=True, confidence={}, boxes={}))
                 self.check_and_alert()
                 time.sleep(self.check_interval)
         except KeyboardInterrupt:
