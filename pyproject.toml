@@ -31,7 +31,7 @@ dev = [
 ]
 
 raspberrypi = [
-    "picamera2>=0.3.0",
+    "picamera2>=0.3.0; sys_platform == 'linux'",
 ]
 
 notifications = [
@@ -40,6 +40,17 @@ notifications = [
 
 [project.scripts]
 couch-monitor = "dog_detector.monitor:main"
+
+[tool.uv]
+environments = [
+  "sys_platform == 'darwin'",
+  "sys_platform == 'linux' and platform_machine == 'aarch64'",
+]
+
+[[tool.uv.dependency-metadata]]
+name = "python-prctl"
+version = "1.8.1"
+requires-dist = []
 
 [tool.setuptools]
 packages = ["dog_detector"]

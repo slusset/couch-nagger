@@ -58,6 +58,7 @@ def load_config():
         'log_file': os.getenv('LOG_FILE', 'logs/couch-nagger.log'),
         'test_image': os.getenv('TEST_IMAGE', 'images/test_dog_on_couch.jpg'),
         'alert_sound': os.getenv('ALERT_SOUND', '/usr/share/sounds/alsa/Front_Center.wav'),
+        'alert_sound_dir': os.getenv('ALERT_SOUND_DIR'),
     }
 
 
@@ -102,7 +103,10 @@ def main():
         sys.exit(1)
 
     # 3. Adapter: Alert Sink
-    alert_sink = AudioAlert(sound_file=config['alert_sound'])
+    alert_sink = AudioAlert(
+        sound_file=config['alert_sound'],
+        sound_dir=config['alert_sound_dir'],
+    )
 
     # 4. App: Monitor
     app = CouchMonitorApp(

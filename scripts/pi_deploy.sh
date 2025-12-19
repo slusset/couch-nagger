@@ -3,7 +3,7 @@
 # Deployment script for Raspberry Pi
 # Creates a timestamped release, clones the repo, and sets up the environment
 #
-set -e
+set -euo pipefail
 
 # Configuration
 MODEL_NAME="${MODEL_NAME:-yolov8m.pt}"
@@ -26,6 +26,9 @@ log_warn() {
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
+
+
+[ -f uv.lock ] || { log_error "uv.lock not found. Commit uv.lock to the repo."; exit 1; }
 
 # Create release directory
 CURRENT_DATETIME=$(date +%Y%m%d_%H%M%S)
@@ -58,18 +61,14 @@ fi
 
 # Create virtual environment with system site packages access
 log_info "Creating virtual environment..."
-python3 -m venv --system-site-packages .venv
+uv venv --python python3
 
 # Activate virtual environment
 source .venv/bin/activate
 
 # Install Python dependencies
-log_info "Installing Python dependencies..."
-uv pip install -r requirements.txt
-
-# Install package in editable mode
-log_info "Installing couch-nagger package..."
-uv pip install -e .
+log_info "Installing Python dependencies from uv.lock..."
+uv sync --frozen --extra raspberrypi
 
 # Ensure shared models directory exists
 log_info "Checking for YOLOv8 model: ${MODEL_NAME}"
@@ -92,8 +91,8 @@ mkdir -p config
 
 # Test imports
 log_info "Testing Python imports..."
-python -c "from picamera2 import Picamera2; print('✓ picamera2 imported successfully')" || log_warn "Failed to import picamera2"
-python -c "from ultralytics import YOLO; print('✓ ultralytics imported successfully')" || log_warn "Failed to import ultralytics"
+uv run python -c "from picamera2 import Picamera2; print('✓ picamera2 imported successfully')" || log_warn "Failed to import picamera2"
+uv run python -c "from ultralytics import YOLO; print('✓ ultralytics imported successfully')" || log_warn "Failed to import ultralytics"
 
 # Create symlink to current release
 log_info "Creating 'current' symlink..."

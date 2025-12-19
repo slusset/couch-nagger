@@ -16,7 +16,7 @@ Environment="PYTHONUNBUFFERED=1"
 EnvironmentFile=-/home/pi/couch-nagger/config/production.env
 
 # Run the monitoring script
-ExecStart=/home/pi/couch-nagger/.venv/bin/python /home/pi/couch-nagger/src/monitor.py
+ExecStart=/home/pi/couch-nagger/.venv/bin/couch-monitor
 
 # Restart policy
 Restart=always
