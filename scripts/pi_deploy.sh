@@ -49,8 +49,6 @@ echo "Changing to ${APP_DIR}"
 cd "${APP_DIR}"
 
 # Make sure lock exists in the fresh repo
-# Temporary branch switch
-git switch hex-app-entrypoint
 [ -f uv.lock ] || { log_error "uv.lock not found. Commit uv.lock to the repo."; exit 1; }
 
 # Add uv to PATH (it's installed in ~/.local/bin by default)
