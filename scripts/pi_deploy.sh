@@ -27,9 +27,6 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-
-[ -f uv.lock ] || { log_error "uv.lock not found. Commit uv.lock to the repo."; exit 1; }
-
 # Create release directory
 CURRENT_DATETIME=$(date +%Y%m%d_%H%M%S)
 RELEASE_DIR="/opt/couch-nagger/releases/${CURRENT_DATETIME}"
@@ -47,8 +44,14 @@ sudo chown $USER:$USER "${RELEASE_DIR}"
 log_info "Cloning repository..."
 git clone git@github.com:slusset/couch-nagger.git "${APP_DIR}"
 
+echo "Changing to ${APP_DIR}"
 # Navigate to app directory
 cd "${APP_DIR}"
+
+# Make sure lock exists in the fresh repo
+# Temporary branch switch
+git switch hex-app-entrypoint
+[ -f uv.lock ] || { log_error "uv.lock not found. Commit uv.lock to the repo."; exit 1; }
 
 # Add uv to PATH (it's installed in ~/.local/bin by default)
 export PATH="$HOME/.local/bin:$PATH"
@@ -60,11 +63,9 @@ if ! command -v uv &> /dev/null; then
 fi
 
 # Create virtual environment with system site packages access
-log_info "Creating virtual environment..."
-uv venv --python python3
-
-# Activate virtual environment
-source .venv/bin/activate
+log_info "Creating virtual environment (system python + system site packages)..."
+rm -rf .venv
+uv venv --python /usr/bin/python3 --system-site-packages
 
 # Install Python dependencies
 log_info "Installing Python dependencies from uv.lock..."
@@ -86,13 +87,12 @@ else
     log_info "Model already exists: ${MODEL_PATH}"
 fi
 
-# Create config directory
-mkdir -p config
-
 # Test imports
 log_info "Testing Python imports..."
-uv run python -c "from picamera2 import Picamera2; print('✓ picamera2 imported successfully')" || log_warn "Failed to import picamera2"
-uv run python -c "from ultralytics import YOLO; print('✓ ultralytics imported successfully')" || log_warn "Failed to import ultralytics"
+.venv/bin/python -c "import libcamera; print('✓ libcamera')"
+.venv/bin/python -c "from picamera2 import Picamera2; print('✓ picamera2')"
+.venv/bin/python -c "import torch; print('✓ torch', torch.__version__)"
+.venv/bin/python -c "from ultralytics import YOLO; print('✓ ultralytics')"
 
 # Create symlink to current release
 log_info "Creating 'current' symlink..."
@@ -105,6 +105,6 @@ log_info "Release deployed to: ${RELEASE_DIR}"
 log_info "Current symlink points to: /opt/couch-nagger/current"
 log_info ""
 log_info "Next steps:"
-log_info "  1. Update systemd service to use: /opt/couch-nagger/current/app"
+log_info "  1. Update systemd service to use: /opt/couch-nagger/current"
 log_info "  2. Restart service: sudo systemctl restart couch-nagger.service"
 log_info ""
