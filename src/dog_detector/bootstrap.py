@@ -78,9 +78,9 @@ def main():
     
     if frame_source is None:
         logger.warning("Picamera2 not available or failed. Falling back to FileFrameSource.")
-        test_img = settings.camera.image_dir + 'test.jpg'
-        if os.path.exists(test_img):
-            frame_source = FileFrameSource(test_img)
+        test_img = Path(settings.camera.image_dir) / 'fonzy_on_couch.png'
+        if test_img.exists():
+            frame_source = FileFrameSource(str(test_img))
             logger.info(f"Using FileFrameSource with {test_img}")
         else:
             logger.error(f"Test image not found at {test_img}. Cannot initialize frame source.")
@@ -101,8 +101,7 @@ def main():
     alert_sink = AudioAlert(
         sound_file=settings.audio.alert_sound,
         sound_dir=settings.audio.alert_sound_dir,
-        alsa_device=settings.audio.alsa_device,
-        quiet=settings.audio.aplay_quiet
+        volume=settings.audio.alert_volume
     )
 
     # 4. App: Monitor

@@ -85,6 +85,7 @@ class AudioSettings:
     # If you’re using aplay, quiet mode keeps logs clean
     aplay_quiet: bool = True
 
+    alert_volume: float = 0.8
 
 @dataclass(frozen=True)
 class AppSettings:
@@ -132,6 +133,7 @@ class AppSettings:
             or "/usr/share/sounds/alsa/Front_Center.wav",
             alert_sound_dir=_getenv("ALERT_SOUND_DIR"),
             aplay_quiet=(_getenv("APLAY_QUIET", "1") != "0"),
+            alert_volume=_getenv_float("ALERT_VOLUME", 0.8),
         )
 
         settings = AppSettings(

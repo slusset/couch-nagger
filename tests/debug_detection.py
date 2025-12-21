@@ -5,7 +5,7 @@ from pathlib import Path
 model = YOLO('yolov8m.pt')
 
 # Run detection
-image_path = Path('../images/test_rpicam_couch.jpg')
+image_path = Path('../assets/test-images/test_rpicam_couch.jpg')
 results = model(str(image_path))
 
 print(f"\nDetections in {image_path.name}:")

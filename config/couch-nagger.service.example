@@ -1,0 +1,29 @@
+[Unit]
+Description=Couch Nagger - Dog Detection Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+# Working directory is critical - all relative paths in .env are relative to this
+WorkingDirectory=/opt/couch-nagger/current
+
+# Load environment from production.env
+EnvironmentFile=/opt/couch-nagger/current/config/production.env
+
+# Run the couch-monitor command
+ExecStart=/opt/couch-nagger/venv/bin/couch-monitor
+
+# Restart on failure
+Restart=on-failure
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=couch-nagger
+
+[Install]
+WantedBy=multi-user.target

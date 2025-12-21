@@ -1,7 +1,7 @@
 import logging
 import random
-import subprocess
 from pathlib import Path
+import pygame
 from dog_detector.ports.alert_sink import AlertSinkPort
 from dog_detector.domain.model import DetectionResult
 
@@ -11,11 +11,16 @@ class AudioAlert(AlertSinkPort):
     def __init__(self,
                  sound_file: str = "/usr/share/sounds/alsa/Front_Center.wav",
                  sound_dir: str | None = None,
-                 alsa_device='default',
-                 quiet=True):
+                 volume: float = 1.0):
         self.sound_file = sound_file
         self.sound_dir = Path(sound_dir) if sound_dir else None
-        self.alsa_device = alsa_device
+        self.volume = max(0.0, min(1.0, volume))  # Clamp between 0.0 and 1.0
+
+        # Initialize pygame mixer
+        try:
+            pygame.mixer.init()
+        except Exception as e:
+            logger.error(f"Failed to initialize audio mixer: {e}")
 
     def _pick_sound_file(self) -> str | None:
         if not self.sound_dir:
@@ -41,9 +46,15 @@ class AudioAlert(AlertSinkPort):
             sound_file = self._pick_sound_file()
             if not sound_file:
                 return
-            logger.info(f"Playing alert sound: {sound_file}")
-            subprocess.run(["aplay", "-D", self.alsa_device, "-q", sound_file], check=False)
-        except FileNotFoundError:
-            logger.error("aplay command not found. Is alsa-utils installed?")
+
+            logger.info(f"Playing alert sound: {sound_file} at volume {self.volume}")
+            sound = pygame.mixer.Sound(sound_file)
+            sound.set_volume(self.volume)
+            sound.play()
+
+            # Wait for sound to finish playing
+            while pygame.mixer.get_busy():
+                pygame.time.wait(100)
+
         except Exception as e:
             logger.error(f"Failed to play alert sound: {e}")
