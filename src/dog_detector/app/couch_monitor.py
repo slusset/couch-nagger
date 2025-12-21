@@ -34,13 +34,17 @@ class CouchMonitorApp:
             
             # 2. Detect
             result = self.detector.detect(frame)
-            
+
             logger.info(f"Detection Result: {result}")
+
+            # Log if person detected on couch
+            if result.boxes.get('person') and result.boxes.get('couch'):
+                logger.info("Person detected on couch (no alert triggered).")
 
             if result.dog_on_couch:
                 current_time = time.time()
                 time_since_last_alert = current_time - self.last_alert_time
-                
+
                 if time_since_last_alert > self.alert_cooldown:
                     logger.info("Dog detected on couch! Triggering alert.")
                     # 3. Alert

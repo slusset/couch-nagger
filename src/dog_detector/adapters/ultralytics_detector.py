@@ -26,6 +26,7 @@ class UltralyticsDetector(DetectorPort):
         else:
             self.model = YOLO('yolov8m.pt')
         self.conf_threshold = conf_threshold
+        self.PERSON_CLASS = 0
         self.DOG_CLASS = 16
         self.COUCH_CLASS = 57
 
@@ -33,26 +34,30 @@ class UltralyticsDetector(DetectorPort):
         # Ultralytics accepts numpy arrays directly
         results = self.model(frame, conf=self.conf_threshold, verbose=False)
 
+        person_boxes = []
         dog_boxes = []
         couch_boxes = []
-        confidences = {'dog': 0.0, 'couch': 0.0}
+        confidences = {'person': 0.0, 'dog': 0.0, 'couch': 0.0}
 
         # We assume single image input, so results[0]
         result = results[0]
-        
+
         for box in result.boxes:
             class_id = int(box.cls[0])
             bbox = box.xyxy[0].tolist()
             conf = float(box.conf[0])
 
-            if class_id == self.DOG_CLASS:
+            if class_id == self.PERSON_CLASS:
+                person_boxes.append(bbox)
+                confidences['person'] = max(confidences['person'], conf)
+            elif class_id == self.DOG_CLASS:
                 dog_boxes.append(bbox)
                 confidences['dog'] = max(confidences['dog'], conf)
             elif class_id == self.COUCH_CLASS:
                 couch_boxes.append(bbox)
                 confidences['couch'] = max(confidences['couch'], conf)
 
-        # Check for overlap
+        # Check for overlap - dog or person on couch
         dog_on_couch = False
         for dog_box in dog_boxes:
             for couch_box in couch_boxes:
@@ -62,8 +67,19 @@ class UltralyticsDetector(DetectorPort):
             if dog_on_couch:
                 break
 
+        # Check for person on couch (without dog)
+        person_on_couch = False
+        if not dog_on_couch:  # Only check if dog isn't already on couch
+            for person_box in person_boxes:
+                for couch_box in couch_boxes:
+                    if boxes_overlap(person_box, couch_box):
+                        person_on_couch = True
+                        break
+                if person_on_couch:
+                    break
+
         return DetectionResult(
-            dog_on_couch=dog_on_couch,
+            dog_on_couch=dog_on_couch or person_on_couch,  # Alert if either is on couch
             confidence=confidences,
-            boxes={'dog': dog_boxes, 'couch': couch_boxes}
+            boxes={'person': person_boxes, 'dog': dog_boxes, 'couch': couch_boxes}
         )
