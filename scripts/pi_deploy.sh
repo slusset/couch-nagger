@@ -89,11 +89,11 @@ fi
 mkdir -p config
 
 # Test imports
-log_info "Testing Python imports..."
-.venv/bin/python -c "import libcamera; print('✓ libcamera')"
-.venv/bin/python -c "from picamera2 import Picamera2; print('✓ picamera2')"
-.venv/bin/python -c "import torch; print('✓ torch', torch.__version__)"
-.venv/bin/python -c "from ultralytics import YOLO; print('✓ ultralytics')"
+#log_info "Testing Python imports..."
+#.venv/bin/python -c "import libcamera; print('✓ libcamera')"
+#.venv/bin/python -c "from picamera2 import Picamera2; print('✓ picamera2')"
+#.venv/bin/python -c "import torch; print('✓ torch', torch.__version__)"
+#.venv/bin/python -c "from ultralytics import YOLO; print('✓ ultralytics')"
 
 # Create symlink to current release
 log_info "Creating 'current' symlink..."

@@ -94,6 +94,7 @@ class AppSettings:
     camera: CameraSettings
     logging: LoggingSettings
     audio: AudioSettings
+    base_dir: Optional[str] = None
 
     @staticmethod
     def load(env_file: Optional[str] = None) -> "AppSettings":
@@ -103,10 +104,22 @@ class AppSettings:
         if env_file:
             _load_env_file(env_file)
 
+        # Base directory for resolving shared paths (models, logs, captures)
+        base_dir = _getenv("BASE_DIR")
+
+        def _resolve_path(path: Optional[str]) -> Optional[str]:
+            """Resolve path relative to BASE_DIR if set and path is relative."""
+            if not path or not base_dir:
+                return path
+            p = Path(path)
+            if p.is_absolute():
+                return path
+            return str(Path(base_dir) / path)
+
         model = ModelSettings(
             model_path=_getenv("MODEL_PATH", "yolov8n.pt") or "yolov8n.pt",
             confidence_threshold=_getenv_float("CONFIDENCE_THRESHOLD", 0.20),
-            model_dir=_getenv("MODEL_DIR"),
+            model_dir=_resolve_path(_getenv("MODEL_DIR")),
         )
 
         detection = DetectionSettings(
@@ -119,12 +132,12 @@ class AppSettings:
         camera = CameraSettings(
             width=_getenv_int("CAMERA_RESOLUTION_WIDTH", 640),
             height=_getenv_int("CAMERA_RESOLUTION_HEIGHT", 480),
-            image_dir=_getenv("IMAGE_DIR"),
+            image_dir=_resolve_path(_getenv("IMAGE_DIR")),
         )
 
         logging_cfg = LoggingSettings(
             level=_getenv("LOG_LEVEL", "INFO") or "INFO",
-            file=_getenv("LOG_FILE", "logs/couch-nagger.log") or "logs/couch-nagger.log",
+            file=_resolve_path(_getenv("LOG_FILE", "logs/couch-nagger.log")) or "logs/couch-nagger.log",
         )
 
         audio = AudioSettings(
@@ -142,6 +155,7 @@ class AppSettings:
             camera=camera,
             logging=logging_cfg,
             audio=audio,
+            base_dir=base_dir,
         )
 
         settings._validate()

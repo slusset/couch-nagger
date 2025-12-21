@@ -78,7 +78,7 @@ def main():
     
     if frame_source is None:
         logger.warning("Picamera2 not available or failed. Falling back to FileFrameSource.")
-        test_img = Path(settings.camera.image_dir) / 'fonzy_on_couch.png'
+        test_img = Path(settings.camera.image_dir) / 'fonzy_sitting_on_couch.png'
         if test_img.exists():
             frame_source = FileFrameSource(str(test_img))
             logger.info(f"Using FileFrameSource with {test_img}")

@@ -24,7 +24,7 @@ class UltralyticsDetector(DetectorPort):
         elif model_path is not None:
             self.model = YOLO(model_path)
         else:
-            self.model = YOLO('yolov8n.pt')
+            self.model = YOLO('yolov8m.pt')
         self.conf_threshold = conf_threshold
         self.DOG_CLASS = 16
         self.COUCH_CLASS = 57
