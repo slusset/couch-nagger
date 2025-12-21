@@ -18,8 +18,13 @@ def boxes_overlap(box1, box2):
     return True
 
 class UltralyticsDetector(DetectorPort):
-    def __init__(self, model_path='yolov8n.pt', conf_threshold=0.25):
-        self.model = YOLO(model_path)
+    def __init__(self, model_path=None, model=None, conf_threshold=0.25):
+        if model is not None:
+            self.model = model
+        elif model_path is not None:
+            self.model = YOLO(model_path)
+        else:
+            self.model = YOLO('yolov8n.pt')
         self.conf_threshold = conf_threshold
         self.DOG_CLASS = 16
         self.COUCH_CLASS = 57
