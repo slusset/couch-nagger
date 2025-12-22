@@ -57,7 +57,7 @@ class UltralyticsDetector(DetectorPort):
                 couch_boxes.append(bbox)
                 confidences['couch'] = max(confidences['couch'], conf)
 
-        # Check for overlap - dog or person on couch
+        # Check for overlap - dog on couch
         dog_on_couch = False
         for dog_box in dog_boxes:
             for couch_box in couch_boxes:
@@ -67,7 +67,7 @@ class UltralyticsDetector(DetectorPort):
             if dog_on_couch:
                 break
 
-        # Check for person on couch (without dog)
+        # Check for person on couch (used for logging/debug, not alerts)
         person_on_couch = False
         if not dog_on_couch:  # Only check if dog isn't already on couch
             for person_box in person_boxes:
@@ -79,7 +79,7 @@ class UltralyticsDetector(DetectorPort):
                     break
 
         return DetectionResult(
-            dog_on_couch=dog_on_couch or person_on_couch,  # Alert if either is on couch
+            dog_on_couch=dog_on_couch,
             confidence=confidences,
             boxes={'person': person_boxes, 'dog': dog_boxes, 'couch': couch_boxes}
         )
