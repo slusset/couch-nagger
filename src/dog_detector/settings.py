@@ -44,6 +44,7 @@ class ModelSettings:
     # e.g. "yolov8n.pt"
     model_path: str = "yolov8n.pt"
     confidence_threshold: float = 0.20
+    person_confidence_threshold: float = 0.25
 
     # Optional: where to store/download weights (shared across releases)
     # If None, Ultralytics uses its defaults/current working dir.
@@ -87,6 +88,7 @@ class AudioSettings:
 
     alert_volume: float = 0.8
 
+
 @dataclass(frozen=True)
 class AppSettings:
     model: ModelSettings
@@ -119,6 +121,7 @@ class AppSettings:
         model = ModelSettings(
             model_path=_getenv("MODEL_PATH", "yolov8n.pt") or "yolov8n.pt",
             confidence_threshold=_getenv_float("CONFIDENCE_THRESHOLD", 0.20),
+            person_confidence_threshold=_getenv_float("PERSON_CONFIDENCE_THRESHOLD", 0.25),
             model_dir=_resolve_path(_getenv("MODEL_DIR")),
         )
 
@@ -137,7 +140,8 @@ class AppSettings:
 
         logging_cfg = LoggingSettings(
             level=_getenv("LOG_LEVEL", "INFO") or "INFO",
-            file=_resolve_path(_getenv("LOG_FILE", "logs/couch-nagger.log")) or "logs/couch-nagger.log",
+            file=_resolve_path(_getenv("LOG_FILE", "logs/couch-nagger.log"))
+            or "logs/couch-nagger.log",
         )
 
         audio = AudioSettings(

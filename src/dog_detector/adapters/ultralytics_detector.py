@@ -1,6 +1,8 @@
+from typing import Optional
 from ultralytics import YOLO
 from dog_detector.ports.detector import DetectorPort
 from dog_detector.domain.model import Frame, DetectionResult
+
 
 def boxes_overlap(box1, box2):
     """Check if two bounding boxes overlap.
@@ -17,27 +19,31 @@ def boxes_overlap(box1, box2):
 
     return True
 
+
 class UltralyticsDetector(DetectorPort):
-    def __init__(self, model_path=None, model=None, conf_threshold=0.25):
+    def __init__(
+        self, model_path=None, model=None, conf_threshold=0.25, person_confidence_threshold=None
+    ):
         if model is not None:
             self.model = model
         elif model_path is not None:
             self.model = YOLO(model_path)
         else:
-            self.model = YOLO('yolov8m.pt')
+            self.model = YOLO("yolov8m.pt")
         self.conf_threshold = conf_threshold
+        self.person_confidence_threshold = person_confidence_threshold or conf_threshold
         self.PERSON_CLASS = 0
         self.DOG_CLASS = 16
         self.COUCH_CLASS = 57
 
-    def detect(self, frame: Frame) -> DetectionResult:
+    def detect(self, frame: Frame, image_filename: Optional[str] = None) -> DetectionResult:
         # Ultralytics accepts numpy arrays directly
         results = self.model(frame, conf=self.conf_threshold, verbose=False)
 
         person_boxes = []
         dog_boxes = []
         couch_boxes = []
-        confidences = {'person': 0.0, 'dog': 0.0, 'couch': 0.0}
+        confidences = {"person": 0.0, "dog": 0.0, "couch": 0.0}
 
         # We assume single image input, so results[0]
         result = results[0]
@@ -49,13 +55,13 @@ class UltralyticsDetector(DetectorPort):
 
             if class_id == self.PERSON_CLASS:
                 person_boxes.append(bbox)
-                confidences['person'] = max(confidences['person'], conf)
+                confidences["person"] = max(confidences["person"], conf)
             elif class_id == self.DOG_CLASS:
                 dog_boxes.append(bbox)
-                confidences['dog'] = max(confidences['dog'], conf)
+                confidences["dog"] = max(confidences["dog"], conf)
             elif class_id == self.COUCH_CLASS:
                 couch_boxes.append(bbox)
-                confidences['couch'] = max(confidences['couch'], conf)
+                confidences["couch"] = max(confidences["couch"], conf)
 
         # Check for overlap - dog on couch
         dog_on_couch = False
@@ -81,5 +87,6 @@ class UltralyticsDetector(DetectorPort):
         return DetectionResult(
             dog_on_couch=dog_on_couch,
             confidence=confidences,
-            boxes={'person': person_boxes, 'dog': dog_boxes, 'couch': couch_boxes}
+            boxes={"person": person_boxes, "dog": dog_boxes, "couch": couch_boxes},
+            image_filename=image_filename,
         )

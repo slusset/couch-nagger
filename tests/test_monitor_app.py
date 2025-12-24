@@ -1,7 +1,11 @@
 import time
+from typing import Any, Optional
 
 from dog_detector.app.couch_monitor import CouchMonitorApp
-from dog_detector.domain.model import DetectionResult
+from dog_detector.domain.model import DetectionResult, Frame
+from dog_detector.ports.frame_source import FrameSourcePort
+from dog_detector.ports.detector import DetectorPort
+from dog_detector.ports.alert_sink import AlertSinkPort
 from dog_detector.settings import (
     AppSettings,
     ModelSettings,
@@ -12,27 +16,27 @@ from dog_detector.settings import (
 )
 
 
-class FakeFrameSource:
-    def __init__(self, frame="frame"):
+class FakeFrameSource(FrameSourcePort):
+    def __init__(self, frame: Any = "frame"):
         self.frame = frame
         self.calls = 0
 
-    def get_frame(self):
+    def get_frame(self) -> tuple[Frame, Optional[str]]:
         self.calls += 1
-        return self.frame
+        return self.frame, None  # type: ignore[return-value]
 
 
-class FakeDetector:
+class FakeDetector(DetectorPort):
     def __init__(self, result: DetectionResult):
         self.result = result
         self.frames = []
 
-    def detect(self, frame):
+    def detect(self, frame: Frame, image_filename: Optional[str] = None) -> DetectionResult:
         self.frames.append(frame)
         return self.result
 
 
-class FakeAlertSink:
+class FakeAlertSink(AlertSinkPort):
     def __init__(self):
         self.alerts = []
 
@@ -50,6 +54,7 @@ def create_test_settings(
         model=ModelSettings(
             model_path="yolov8n.pt",
             confidence_threshold=0.20,
+            person_confidence_threshold=0.25,
         ),
         detection=DetectionSettings(
             check_interval=check_interval,
@@ -138,8 +143,8 @@ def test_no_alert_when_no_dog_on_couch():
 
 
 def test_errors_in_check_cycle_do_not_raise():
-    class BoomFrameSource:
-        def get_frame(self):
+    class BoomFrameSource(FrameSourcePort):
+        def get_frame(self) -> tuple[Frame, Optional[str]]:
             raise RuntimeError("camera failure")
 
     result = DetectionResult(dog_on_couch=True, confidence={}, boxes={})

@@ -97,12 +97,15 @@ def main():
             logger.info(f"Using model directory: {settings.model.model_dir}")
             yolo_model = load_yolo_model(settings.model.model_dir, settings.model.model_path)
             detector = UltralyticsDetector(
-                model=yolo_model, conf_threshold=settings.model.confidence_threshold
+                model=yolo_model,
+                conf_threshold=settings.model.confidence_threshold,
+                person_confidence_threshold=settings.model.person_confidence_threshold,
             )
         else:
             detector = UltralyticsDetector(
                 model_path=settings.model.model_path,
                 conf_threshold=settings.model.confidence_threshold,
+                person_confidence_threshold=settings.model.person_confidence_threshold,
             )
     except Exception as e:
         logger.error(f"Failed to initialize detector: {e}")

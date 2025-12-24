@@ -5,7 +5,7 @@ from dog_detector import DogDetector, boxes_overlap
 # Get the test file's directory
 TEST_DIR = Path(__file__).parent
 PROJECT_ROOT = TEST_DIR.parent
-IMAGE_DIR = PROJECT_ROOT / "images"
+IMAGE_DIR = PROJECT_ROOT / "assets" / "test-images"
 
 
 class TestBoxOverlap:
