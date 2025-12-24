@@ -6,6 +6,7 @@ from typing import Optional
 import cv2
 
 from dog_detector.domain.model import DetectionResult, Frame
+from dog_detector.ports.detection_saver import DetectionSaverPort
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ BOX_COLORS = {
 }
 
 
-class DetectionImageSaver:
+class DetectionImageSaver(DetectionSaverPort):
     def __init__(self, output_dir: str):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

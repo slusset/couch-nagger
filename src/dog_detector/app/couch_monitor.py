@@ -6,7 +6,7 @@ from dog_detector.domain.model import DetectionResult
 from dog_detector.ports.frame_source import FrameSourcePort
 from dog_detector.ports.detector import DetectorPort
 from dog_detector.ports.alert_sink import AlertSinkPort
-from dog_detector.adapters.detection_saver import DetectionImageSaver
+from dog_detector.ports.detection_saver import DetectionSaverPort
 from dog_detector.settings import AppSettings
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class CouchMonitorApp:
         detector: DetectorPort,
         alert_sink: AlertSinkPort,
         settings: AppSettings,
-        detection_saver: Optional[DetectionImageSaver] = None,
+        detection_saver: Optional[DetectionSaverPort] = None,
     ):
         self.frame_source = frame_source
         self.detector = detector
