@@ -11,6 +11,7 @@ CONFIG = {
     # Camera settings (webcam)
     "camera_width": 1280,
     "camera_height": 720,
+    "save_images": False,
     # Logging
     "log_level": "DEBUG",
     "log_file": "logs/development.log",

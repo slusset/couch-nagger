@@ -67,6 +67,9 @@ class CameraSettings:
     # Optional: where to save captured images (if your adapter writes files)
     image_dir: Optional[str] = None
 
+    # Whether to save captured images to disk
+    save_images: bool = False
+
 
 @dataclass(frozen=True)
 class LoggingSettings:
@@ -136,6 +139,7 @@ class AppSettings:
             width=_getenv_int("CAMERA_RESOLUTION_WIDTH", 640),
             height=_getenv_int("CAMERA_RESOLUTION_HEIGHT", 480),
             image_dir=_resolve_path(_getenv("IMAGE_DIR")),
+            save_images=(_getenv("SAVE_IMAGES", "0") == "1"),
         )
 
         logging_cfg = LoggingSettings(

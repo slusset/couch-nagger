@@ -74,6 +74,7 @@ def main():
                 width=settings.camera.width,
                 height=settings.camera.height,
                 image_dir=settings.camera.image_dir,
+                save_images=settings.camera.save_images,
             )
             logger.info("Using Picamera2FrameSource")
         except Exception as e:

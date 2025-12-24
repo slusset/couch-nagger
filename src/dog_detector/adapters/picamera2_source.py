@@ -18,15 +18,16 @@ logger = logging.getLogger(__name__)
 
 
 class Picamera2FrameSource(FrameSourcePort):
-    def __init__(self, width=640, height=480, image_dir=None):
+    def __init__(self, width=640, height=480, image_dir=None, save_images=False):
         if Picamera2 is None:
             raise ImportError("Picamera2 is not available on this system.")
 
         self.width = width
         self.height = height
+        self.save_images = save_images
         self.image_dir = Path(image_dir) if image_dir else None
 
-        if self.image_dir:
+        if self.save_images and self.image_dir:
             self.image_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"Images will be saved to {self.image_dir}")
 
@@ -45,7 +46,7 @@ class Picamera2FrameSource(FrameSourcePort):
         frame = self.camera.capture_array()
 
         image_filename = None
-        if self.image_dir:
+        if self.save_images and self.image_dir:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             filename = self.image_dir / f"capture_{timestamp}.jpg"
             cv2.imwrite(str(filename), frame)

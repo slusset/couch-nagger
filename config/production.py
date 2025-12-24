@@ -11,6 +11,7 @@ CONFIG = {
     # Camera settings (Pi Camera)
     "camera_width": 640,
     "camera_height": 480,
+    "save_images": True,
     # Logging
     "log_level": "INFO",
     "log_file": "/home/pi/couch-nagger/logs/couch-nagger.log",
