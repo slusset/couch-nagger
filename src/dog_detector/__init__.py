@@ -1,3 +1,14 @@
-from .dog_detector import DogDetector, boxes_overlap
+from dog_detector.adapters.ultralytics_detector import (
+    UltralyticsDetector,
+    calculate_overlap_ratio,
+)
+from dog_detector.domain.model import DetectionResult, Frame
+from dog_detector.ports.detector import DetectorPort
 
-__all__ = ['DogDetector', 'boxes_overlap']
+__all__ = [
+    "UltralyticsDetector",
+    "calculate_overlap_ratio",
+    "DetectionResult",
+    "DetectorPort",
+    "Frame",
+]
