@@ -1,10 +1,12 @@
 import time
 import logging
+from typing import Optional
 
 from dog_detector.domain.model import DetectionResult
 from dog_detector.ports.frame_source import FrameSourcePort
 from dog_detector.ports.detector import DetectorPort
 from dog_detector.ports.alert_sink import AlertSinkPort
+from dog_detector.adapters.detection_saver import DetectionImageSaver
 from dog_detector.settings import AppSettings
 
 logger = logging.getLogger(__name__)
@@ -17,10 +19,12 @@ class CouchMonitorApp:
         detector: DetectorPort,
         alert_sink: AlertSinkPort,
         settings: AppSettings,
+        detection_saver: Optional[DetectionImageSaver] = None,
     ):
         self.frame_source = frame_source
         self.detector = detector
         self.alert_sink = alert_sink
+        self.detection_saver = detection_saver
         self.check_interval = settings.detection.check_interval
         self.alert_cooldown = settings.detection.alert_cooldown
         self.test_mode = settings.detection.test_mode
@@ -30,23 +34,23 @@ class CouchMonitorApp:
 
     def check_and_alert(self):
         try:
-            # 1. Get Frame
             frame, image_filename = self.frame_source.get_frame()
-
-            # 2. Detect
             result = self.detector.detect(frame, image_filename=image_filename)
 
-            # Log detailed detection information
             image_info = f"image={image_filename}" if image_filename else "image=live_camera"
             logger.info(
                 f"{image_info} | "
                 f"dog_on_couch={result.dog_on_couch} | "
-                f"confidences: dog={result.confidence.get('dog', 0.0):.3f}, "
+                f"overlap={result.overlap_ratio:.2f} | "
+                f"dog={result.confidence.get('dog', 0.0):.3f}, "
                 f"person={result.confidence.get('person', 0.0):.3f}, "
                 f"couch={result.confidence.get('couch', 0.0):.3f}"
             )
 
-            # Log if person detected on couch
+            if result.boxes.get("dog") and self.detection_saver:
+                saved_path = self.detection_saver.save(frame, result)
+                logger.debug(f"Saved detection image: {saved_path}")
+
             if result.boxes.get("person") and result.boxes.get("couch"):
                 logger.info(
                     f"{image_info} | Person detected on couch (no alert triggered). "

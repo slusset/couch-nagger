@@ -57,18 +57,17 @@ class DetectionSettings:
     alert_cooldown: float = 300.0
     test_mode: bool = False
     test_alert_every_n: int = 0
+    min_overlap_threshold: float = 0.3  # 0.0-1.0: fraction of dog's box that must overlap couch
 
 
 @dataclass(frozen=True)
 class CameraSettings:
     width: int = 640
     height: int = 480
-
-    # Optional: where to save captured images (if your adapter writes files)
     image_dir: Optional[str] = None
-
-    # Whether to save captured images to disk
     save_images: bool = False
+    save_detection_images: bool = False
+    detection_image_dir: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -133,6 +132,7 @@ class AppSettings:
             alert_cooldown=_getenv_float("ALERT_COOLDOWN", 300.0),
             test_mode=(_getenv("TEST_MODE", "0") == "1"),
             test_alert_every_n=_getenv_int("TEST_ALERT_EVERY_N", 0),
+            min_overlap_threshold=_getenv_float("MIN_OVERLAP_THRESHOLD", 0.3),
         )
 
         camera = CameraSettings(
@@ -140,6 +140,8 @@ class AppSettings:
             height=_getenv_int("CAMERA_RESOLUTION_HEIGHT", 480),
             image_dir=_resolve_path(_getenv("IMAGE_DIR")),
             save_images=(_getenv("SAVE_IMAGES", "0") == "1"),
+            save_detection_images=(_getenv("SAVE_DETECTION_IMAGES", "0") == "1"),
+            detection_image_dir=_resolve_path(_getenv("DETECTION_IMAGE_DIR")),
         )
 
         logging_cfg = LoggingSettings(

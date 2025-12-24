@@ -9,5 +9,6 @@ Frame: TypeAlias = np.ndarray
 class DetectionResult:
     dog_on_couch: bool
     confidence: Dict[str, float]
-    boxes: Dict[str, Any]  # Store raw boxes if needed for debugging/visualization
-    image_filename: Optional[str] = None  # Optional metadata for logging/debugging
+    boxes: Dict[str, Any]
+    image_filename: Optional[str] = None
+    overlap_ratio: float = 0.0

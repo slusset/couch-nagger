@@ -12,9 +12,8 @@ from pathlib import Path
 from ultralytics import YOLO
 
 from dog_detector.adapters.audio_alert import AudioAlert
+from dog_detector.adapters.detection_saver import DetectionImageSaver
 from dog_detector.adapters.file_source import FileFrameSource
-
-# Adapters
 from dog_detector.adapters.ultralytics_detector import UltralyticsDetector
 
 # Ports & Domain
@@ -90,10 +89,8 @@ def main():
             logger.error(f"Test image not found at {test_img}. Cannot initialize frame source.")
             sys.exit(1)
 
-    # 2. Adapter: Detector
     logger.info(f"Loading detector model: {settings.model.model_path}")
     try:
-        # If MODEL_DIR is set, load model from that directory
         if settings.model.model_dir:
             logger.info(f"Using model directory: {settings.model.model_dir}")
             yolo_model = load_yolo_model(settings.model.model_dir, settings.model.model_path)
@@ -101,27 +98,38 @@ def main():
                 model=yolo_model,
                 conf_threshold=settings.model.confidence_threshold,
                 person_confidence_threshold=settings.model.person_confidence_threshold,
+                min_overlap_threshold=settings.detection.min_overlap_threshold,
             )
         else:
             detector = UltralyticsDetector(
                 model_path=settings.model.model_path,
                 conf_threshold=settings.model.confidence_threshold,
                 person_confidence_threshold=settings.model.person_confidence_threshold,
+                min_overlap_threshold=settings.detection.min_overlap_threshold,
             )
+        logger.info(f"Overlap threshold: {settings.detection.min_overlap_threshold}")
     except Exception as e:
         logger.error(f"Failed to initialize detector: {e}")
         sys.exit(1)
 
-    # 3. Adapter: Alert Sink
     alert_sink = AudioAlert(
         sound_file=settings.audio.alert_sound,
         sound_dir=settings.audio.alert_sound_dir,
         volume=settings.audio.alert_volume,
     )
 
-    # 4. App: Monitor
+    detection_saver = None
+    if settings.camera.save_detection_images:
+        detection_dir = settings.camera.detection_image_dir or "detections"
+        detection_saver = DetectionImageSaver(output_dir=detection_dir)
+        logger.info(f"Detection image saving enabled: {detection_dir}")
+
     app = CouchMonitorApp(
-        frame_source=frame_source, detector=detector, alert_sink=alert_sink, settings=settings
+        frame_source=frame_source,
+        detector=detector,
+        alert_sink=alert_sink,
+        settings=settings,
+        detection_saver=detection_saver,
     )
 
     # Run
